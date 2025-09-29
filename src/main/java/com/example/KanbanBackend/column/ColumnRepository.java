@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface ColumnRepository extends JpaRepository<ColumnEntity, Long> {
-    List<ColumnEntity> findByBoardIdOrderByPosition(Long boardId);
+    List<ColumnEntity> findByBoardIdOrderByPositionAsc(Long boardId);
 }

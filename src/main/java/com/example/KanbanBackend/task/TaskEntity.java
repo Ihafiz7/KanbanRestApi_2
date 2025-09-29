@@ -1,5 +1,6 @@
 package com.example.KanbanBackend.task;
 
+import com.example.KanbanBackend.column.ColumnEntity;
 import com.example.KanbanBackend.enums.TaskPriority;
 import com.example.KanbanBackend.enums.TaskStatus;
 import com.example.KanbanBackend.persistance.BaseEntity;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 public class TaskEntity extends BaseEntity {
 
     @Column(nullable = false)
-    private String title;
+        private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
@@ -44,4 +45,8 @@ public class TaskEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "project_id", nullable = false)
     private ProjectEntity project;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "column_id", nullable = false)
+    private ColumnEntity column;
 }

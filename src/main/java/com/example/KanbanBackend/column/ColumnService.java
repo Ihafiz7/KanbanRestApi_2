@@ -1,60 +1,45 @@
 package com.example.KanbanBackend.column;
 
+import com.example.KanbanBackend.task.Mapper;
+import com.example.KanbanBackend.task.TaskDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ColumnService {
-    private final ColumnRepository repository;
 
-    public ColumnService(ColumnRepository repository) {
-        this.repository = repository;
+    private final ColumnRepository columnRepository;
+    private final Mapper taskMapper;
+
+    public List<ColumnDTO> getColumnsByBoardId(Long boardId) {
+        List<ColumnEntity> columns = columnRepository.findByBoardIdOrderByPositionAsc(boardId);
+
+        return columns.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+    public void deleteById(Long id){
+        this.columnRepository.deleteById(id);
     }
 
-    public ColumnEntity createColumn(Long boardId, ColumnDto dto) {
-        ColumnEntity column = new ColumnEntity();
-        column.setBoardId(boardId);
-        column.setName(dto.getName());
-        column.setPosition(dto.getPosition());
-        return repository.save(column);
-    }
+    private ColumnDTO toDTO(ColumnEntity column) {
+        ColumnDTO dto = new ColumnDTO();
+        dto.setId(column.getId());
 
+        dto.setBoardId(column.getBoard().getId());
+        dto.setName(column.getName());
+        dto.setPosition(column.getPosition());
 
-    public ColumnEntity updateColumn(Long id, UpdateDto dto) {
-        ColumnEntity existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Column not found: " + id));
+        List<TaskDTO> taskDTOs = column.getTasks().stream()
+                .map(taskMapper::toDTO)
+                .collect(Collectors.toList());
 
-        if (dto.getName() != null) existing.setName(dto.getName());
-        if (dto.getPosition() != null) existing.setPosition(dto.getPosition());
+        dto.setTasks(taskDTOs);
 
-        return repository.save(existing);
-    }
-
-
-    public void deleteColumn(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Column not found: " + id);
-        }
-        repository.deleteById(id);
-    }
-
-    public void reorderColumns(List<ReorderDto> reorderList) {
-        for (ReorderDto dto : reorderList) {
-            ColumnEntity column = repository.findById(dto.getId())
-                    .orElseThrow(() -> new RuntimeException("Column not found: " + dto.getId()));
-            column.setPosition(dto.getPosition());
-            repository.save(column);
-        }
-    }
-
-    // Get all columns for a board
-    public List<ColumnEntity> getColumnsByBoard(Long boardId) {
-        return repository.findByBoardIdOrderByPosition(boardId);
-    }
-
-    public ColumnEntity findById(Long id) {
-        return repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Column not found: " + id));
+        return dto;
     }
 }

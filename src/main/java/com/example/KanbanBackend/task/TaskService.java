@@ -10,7 +10,7 @@ import java.util.List;
 @Transactional
 public class TaskService {
     private final TaskRepository repository;
-    private final Mapper mapper; // injected mapper
+    private final Mapper mapper;
     private final UserRepository userRepository;
 
     public TaskService(TaskRepository repository, Mapper mapper, UserRepository userRepository){
